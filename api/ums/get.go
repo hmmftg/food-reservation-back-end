@@ -10,29 +10,29 @@ import (
 	"github.com/hmmftg/requestCore/libRequest"
 )
 
-func (u UserData) GetCheckData() *CheckResponse {
+func (u User) GetCheckData() *CheckResponse {
 	return &CheckResponse{
 		UserId:        u.ID,
 		UserName:      u.Name,
 		PersonID:      u.PersonID,
-		Roles:         u.Roles,
+		Roles:         GetRoles(u.Roles),
 		Authenticated: true,
 	}
 }
 
-func (u UserData) GetPermissonData() *CheckResponse {
+func (u User) GetPermissonData() *CheckResponse {
 	return &CheckResponse{
-		Roles: u.Roles,
+		Roles: GetRoles(u.Roles),
 	}
 }
 
-func (u UserData) GetIDData() *CheckResponse {
+func (u User) GetIDData() *CheckResponse {
 	return &CheckResponse{
 		UserId:        u.ID,
 		UserName:      u.Name,
 		PersonID:      u.PersonID,
 		Authenticated: true,
-		Roles:         u.Roles,
+		Roles:         GetRoles(u.Roles),
 	}
 }
 func (env umsEnv) umsCheck(simulation bool) any {

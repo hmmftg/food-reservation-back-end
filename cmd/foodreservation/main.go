@@ -1,19 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"time"
-
-	"net/http"
-	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/hmmftg/food-reservation-back-end/api/ums"
 	"github.com/hmmftg/food-reservation-back-end/internal/params"
-	"github.com/hmmftg/requestCore"
 	initiator "github.com/hmmftg/requestCore/libApplication"
-	"github.com/hmmftg/requestCore/libParams"
 	"github.com/swaggo/swag/v2"
 )
 
@@ -44,32 +37,6 @@ func (a Application) SwaggerSpec() *swag.Spec {
 func (a Application) RequestFields() string {
 	return ""
 }
-func (a Application) AddRoutes(
-	model *requestCore.RequestCoreModel,
-	wsParams *libParams.ApplicationParams[params.FoodReservationParams],
-	roleMap map[string]string,
-	rg *gin.RouterGroup,
-) {
-	api := rg.Group("api")
-	ums.AddumsRoutes(model, wsParams, rg, api, false)
-
-	rg.Static("/"+wsParams.Specific.StaticBaseUrl, wsParams.Specific.StaticPath)
-
-	// Redirect root requests to '/ui'
-	rg.GET("/", func(c *gin.Context) {
-		c.Redirect(301, "/"+wsParams.Specific.StaticBaseUrl)
-	})
-
-	a.engine.NoRoute(func(c *gin.Context) {
-		// Catch-all route for React app
-		if strings.HasPrefix(c.Request.RequestURI, "/"+wsParams.Specific.StaticBaseUrl) {
-			c.File(wsParams.Specific.StaticPath + "/index.html")
-		} else {
-			c.JSON(http.StatusNotFound, gin.H{"code": "PAGE_NOT_FOUND", "message": fmt.Sprintf("404 page %s not found", c.Request.RequestURI)})
-		}
-	})
-
-}
 
 func (a *Application) InitGinApp(engine *gin.Engine) {
 	a.engine = engine
@@ -96,10 +63,6 @@ func (a Application) GetKeys() [][]byte {
 	return [][]byte{keyByte, ivByte}
 }
 
-func (a Application) InitParams(wsParams *libParams.ApplicationParams[params.FoodReservationParams]) {
-
-}
-
 // @title           سامانه سرویس های رزرو غذا
 // @version         V0.0.1
 
@@ -116,5 +79,6 @@ func (a Application) InitParams(wsParams *libParams.ApplicationParams[params.Foo
 // @bearerFormat: JWT
 // @type: http
 func main() {
-	initiator.InitializeApp(&Application{})
+	app := initiator.InitializeApp[params.FoodReservationParams](&Application{})
+	initiator.StartApp(*app)
 }

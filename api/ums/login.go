@@ -17,14 +17,22 @@ import (
 	"github.com/hmmftg/requestCore/webFramework"
 )
 
-func (u UserData) GetLoginData(token, refreshToken string) *LoginResponse {
+func GetRoles(roles []Role) []string {
+	result := make([]string, len(roles))
+	for i := 0; i < len(roles); i++ {
+		result[i] = roles[i].ID
+	}
+	return result
+}
+
+func (u User) GetLoginData(token, refreshToken string) *LoginResponse {
 	return &LoginResponse{
 		ID:           u.ID,
 		Name:         u.Name,
 		Department:   u.Department,
-		Roles:        u.Roles,
+		Roles:        GetRoles(u.Roles),
 		PersonID:     u.PersonID,
-		UserData:     u.UserData,
+		UserData:     u.Data,
 		RefreshToken: refreshToken,
 		AccessToken:  token,
 	}
@@ -59,8 +67,8 @@ func (h LoginHandler) Initializer(req handlers.HandlerRequest[LoginRequest, *Log
 	return nil
 }
 
-func GetUserData(userName string, core requestCore.RequestCoreInterface) (*UserData, error) {
-	result, err := libQuery.GetQuery[UserData](`--sql
+func GetUserData(userName string, core requestCore.RequestCoreInterface) (*User, error) {
+	result, err := libQuery.GetQuery[User](`--sql
 		select * 
 		  from [USERS] 
 		 where id = ?
@@ -119,7 +127,7 @@ func (h LoginHandler) Handler(req handlers.HandlerRequest[LoginRequest, *LoginRe
 		token, err := GenerateToken(dt,
 			36000,
 			"simple",
-			user.Roles,
+			GetRoles(user.Roles),
 			user.ID)
 		if err != nil {
 			return nil, libError.New(http.StatusBadRequest, "ERROR_GENERATE_TOKEN", err.Error())
@@ -128,7 +136,7 @@ func (h LoginHandler) Handler(req handlers.HandlerRequest[LoginRequest, *LoginRe
 		refreshToken, err := GenerateToken(dt,
 			72000,
 			"simple",
-			user.Roles,
+			GetRoles(user.Roles),
 			user.ID)
 		if err != nil {
 			return nil, libError.New(http.StatusBadRequest, "ERROR_GENERATE_TOKEN", err.Error())

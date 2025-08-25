@@ -2,6 +2,7 @@ package ums
 
 import (
 	"github.com/hmmftg/food-reservation-back-end/internal/otp"
+	"github.com/hmmftg/food-reservation-back-end/internal/params"
 	"github.com/hmmftg/requestCore"
 	"github.com/hmmftg/requestCore/libParams"
 )
@@ -46,14 +47,18 @@ type LoginRequest struct {
 	Pass     string `json:"password"`
 }
 
-type UserData struct {
-	ID         string   `db:"ID"`
-	Name       string   `db:"NAME"`
-	Department string   `db:"DEPARTMENT"`
-	Roles      []string `db:"ROLES"`
-	PersonID   string   `db:"PERSON_ID"`
-	UserData   string   `db:"USER_DATA"`
-	Password   string   `db:"PASS"`
+type Role struct {
+	params.Model
+}
+
+type User struct {
+	params.Model
+	Name       string
+	Department string
+	Roles      []Role `gorm:"many2many:user_roles;"`
+	PersonID   string
+	Data       string
+	Password   string
 }
 
 type LoginHandler struct {

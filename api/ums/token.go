@@ -98,7 +98,7 @@ func ValidateOtp(key, passCode string) bool {
 func ValidateJwtToken(
 	core requestCore.RequestCoreInterface,
 	tokenRaw string,
-) (*UserData, error) {
+) (*User, error) {
 	jwtToken, err := jwt.ParseWithClaims(tokenRaw, &jwt.RegisteredClaims{}, GenJwtKey())
 	if err != nil {
 		validationErr, ok := err.(*jwt.ValidationError)
